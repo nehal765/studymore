@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>My Availability | StudyMore</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='zine.css') }}">
+    {% include "_ui_head.html" %}
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='theme_motion.css') }}">
+    <script src="{{ url_for('static', filename='theme_motion.js') }}" defer></script>
+</head>
+
+<body>
+
+{% include "_nav.html" %}
+<div class="crumbs"><a href="#" class="back-link" onclick="history.back();return false;">&larr; Back</a></div>
+
+
+<main class="availability-main">
+
+    <div class="page-heading">
+        <h1>My Availability</h1>
+        <p>
+            Select the times you are usually available to study.
+            Your availability helps StudyMore find better study matches
+            and identify the best meeting times.
+        </p>
+    </div>
+
+    {% if message %}
+        <div class="message notice">{{ message }}</div>
+    {% endif %}
+
+    <form method="POST" class="availability-form">
+
+        <div class="availability-card">
+
+            <div class="availability-instructions">
+                <div>
+                    <h2>Weekly Availability</h2>
+                    <p>Click each time block when you are available.</p>
+                </div>
+
+                <div class="availability-legend">
+                    <span class="legend-box"></span>
+                    Available
+                </div>
+                <p class="availability-count mono" id="availCount"></p>
+            </div>
+
+            <div class="availability-scroll">
+                <div class="availability-grid">
+
+                    <div class="grid-header time-header">Time</div>
+
+                    {% for day in days %}
+                        <div class="grid-header"><span class="d-full">{{ day }}</span><span class="d-short">{{ day[:3] }}</span></div>
+                    {% endfor %}
+
+                    {% for slot in time_slots %}
+
+                        <div class="time-label">
+                            {{ slot.label }}
+                        </div>
+
+                        {% for day in days %}
+
+                            {% set slot_value = day ~ '|' ~ slot.start ~ '|' ~ slot.end %}
+
+                            <label class="availability-slot">
+                                <input
+                                    type="checkbox"
+                                    name="availability"
+                                    value="{{ slot_value }}"
+                                    {% if slot_value in selected_slots %}checked{% endif %}
+                                >
+                                <span></span>
+                            </label>
+
+                        {% endfor %}
+
+                    {% endfor %}
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="availability-actions">
+            <button type="submit" class="primary">
+                Save Availability
+            </button>
+
+            <span class="availability-save-note">
+                You can update your schedule anytime.
+            </span>
+        </div>
+
+    </form>
+
+</main>
+
+{% include "_ui_foot.html" %}
+</body>
+</html>

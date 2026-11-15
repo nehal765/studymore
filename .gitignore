@@ -1,0 +1,11 @@
+study_more.db
+app copy.py
+__pycache__/
+*.pyc
+*.db
+src/static/uploads/
+.env
+.env.*
+!.env.example
+.vercel/
+public/static/

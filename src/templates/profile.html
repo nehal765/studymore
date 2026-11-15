@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>My Profile | StudyMore</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='zine.css') }}">
+    {% include "_ui_head.html" %}
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='theme_motion.css') }}">
+    <script src="{{ url_for('static', filename='theme_motion.js') }}" defer></script>
+</head>
+
+<body>
+
+{% include "_nav.html" %}
+<div class="crumbs"><a href="#" class="back-link" onclick="history.back();return false;">&larr; Back</a></div>
+
+
+<main class="create-main profile-main">
+
+    {% set pc = avatar_colors.get(values.avatar_color) if avatar_colors else None %}
+    <section class="profile-header"{% if pc %} style="background: {{ pc }};"{% endif %}>
+        {% if avatar_url %}<img class="profile-avatar" src="{{ avatar_url }}" alt="Your profile photo">{% else %}<div class="profile-avatar">{{ initials }}</div>{% endif %}
+        <div class="profile-headline">
+            <h1>{{ values.display_name or "Your profile" }}</h1>
+            <p>
+                {% if headline %}{{ headline }}{% else %}Tell other students a bit about you{% endif %}
+                &middot; {{ email }}
+            </p>
+
+            <div class="profile-stats">
+                <span class="stat-chip"><strong>{{ stats.groups }}</strong> study group{{ '' if stats.groups == 1 else 's' }}</span>
+                <span class="stat-chip"><strong>{{ stats.requests }}</strong> active request{{ '' if stats.requests == 1 else 's' }}</span>
+                <span class="stat-chip"><strong>{{ stats.blocks }}</strong> availability block{{ '' if stats.blocks == 1 else 's' }}</span>
+            </div>
+        </div>
+    </section>
+
+    {% if saved %}
+        <div class="message success" role="status">Your profile has been saved.</div>
+    {% endif %}
+
+    {% if errors %}
+        <div class="message error" role="alert">
+            Please fix the following:
+            <ul class="error-list">
+                {% for error in errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <form method="POST" class="create-form" enctype="multipart/form-data">
+
+        <details class="form-section" open>
+            <summary><h2>About you</h2></summary>
+
+            <label for="display_name">
+                <span>Display name <span class="required">*</span></span>
+                <input type="text" id="display_name" name="display_name" maxlength="60"
+                       value="{{ values.display_name }}" required>
+            </label>
+
+            <label for="bio">
+                <span>Bio <span class="optional">(optional)</span></span>
+                <textarea id="bio" name="bio" rows="3" maxlength="{{ max_bio }}"
+                          placeholder="Example: Junior who studies best in the evenings and loves explaining things.">{{ values.bio }}</textarea>
+                <small class="field-hint">Up to {{ max_bio }} characters.</small>
+            </label>
+
+            <fieldset class="avatar-picker">
+                <legend>Profile color</legend>
+                <div class="swatch-row">
+                    {% for key, hex in avatar_colors.items() %}
+                        <label class="swatch">
+                            <input type="radio" name="avatar_color" value="{{ key }}" data-hex="{{ hex }}"
+                                   {% if values.avatar_color == key %}checked{% endif %}>
+                            <span class="swatch-dot" style="background: {{ hex }};" title="{{ key|title }}"></span>
+                            <span class="sr-only">{{ key|title }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+                <small class="field-hint">Colors your profile banner. Pick one and watch the top of the page.</small>
+            </fieldset>
+
+            <div class="avatar-upload">
+                {% if avatar_url %}<img src="{{ avatar_url }}" alt="">{% endif %}
+                <label><span>Profile photo (JPG, PNG or WebP, up to 3 MB)</span>
+                    <input type="file" name="avatar" accept="image/jpeg,image/png,image/webp">
+                </label>
+            </div>
+            {% if avatar_url %}<label class="privacy-toggle"><input type="checkbox" name="remove_photo"> Remove my photo</label>{% endif %}
+
+            <label class="checkbox privacy-toggle" for="show_in_groups">
+                <input type="checkbox" id="show_in_groups" name="show_in_groups"
+                       {% if values.show_in_groups %}checked{% endif %}>
+                <span>Show my class year, major, and study style to members of groups I join</span>
+            </label>
+            <small class="field-hint">Your name always shows. Your email is never shown.</small>
+        </details>
+
+        <details class="form-section" open>
+            <summary><h2>Academics</h2></summary>
+
+            <div class="form-grid">
+                <label for="major">
+                    <span>Major</span>
+                    <input type="text" id="major" name="major" maxlength="80"
+                           placeholder="Example: Computer Science" value="{{ values.major }}">
+                </label>
+
+                <label for="minor">
+                    <span>Minor <span class="optional">(optional)</span></span>
+                    <input type="text" id="minor" name="minor" maxlength="80"
+                           placeholder="Example: Business Administration" value="{{ values.minor }}">
+                </label>
+            </div>
+
+            <div class="form-grid">
+                <label for="class_year">
+                    <span>Class year</span>
+                    <select id="class_year" name="class_year">
+                        <option value="">Select one</option>
+                        {% for option in class_years %}
+                            <option value="{{ option }}" {% if values.class_year == option %}selected{% endif %}>{{ option }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+
+                <label for="grad_term">
+                    <span>Expected graduation</span>
+                    <input type="text" id="grad_term" name="grad_term" maxlength="80"
+                           placeholder="Example: May 2028" value="{{ values.grad_term }}">
+                </label>
+            </div>
+
+            <label for="courses">
+                <span>Courses this semester</span>
+                <input type="text" id="courses" name="courses"
+                       placeholder="Example: CSE 3311, MATH 1426, ENGL 1302" value="{{ values.courses }}">
+                <small class="field-hint">Separate courses with commas.</small>
+            </label>
+        </details>
+
+        <details class="form-section" open>
+            <summary><h2>How you like to study</h2></summary>
+
+            <div class="form-grid">
+                <label for="study_style">
+                    <span>Study style</span>
+                    <select id="study_style" name="study_style">
+                        <option value="">Select one</option>
+                        {% for option in study_styles %}
+                            <option value="{{ option }}" {% if values.study_style == option %}selected{% endif %}>{{ option }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+
+                <label for="group_size">
+                    <span>Preferred group size</span>
+                    <select id="group_size" name="group_size">
+                        <option value="">Select one</option>
+                        {% for option in group_sizes %}
+                            <option value="{{ option }}" {% if values.group_size == option %}selected{% endif %}>{{ option }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+            </div>
+
+            <fieldset class="meeting-options">
+                <legend>Preferred meeting type</legend>
+                <div class="chip-group">
+                    {% for option in meeting_preferences %}
+                        <label class="chip">
+                            <input type="radio" name="meeting_pref" value="{{ option }}"
+                                   {% if values.meeting_pref == option %}checked{% endif %}>
+                            <span>{{ option }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+            </fieldset>
+
+            <fieldset class="meeting-options">
+                <legend>What you usually study for</legend>
+                <div class="chip-group">
+                    {% for option in study_goals %}
+                        <label class="chip">
+                            <input type="checkbox" name="study_goals" value="{{ option }}"
+                                   {% if option in values.study_goals %}checked{% endif %}>
+                            <span>{{ option }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+            </fieldset>
+        </details>
+
+        <details class="form-section" open>
+            <summary><h2>Help and interests</h2></summary>
+
+            <div class="form-grid">
+                <label for="can_help">
+                    <span>Subjects you can help with</span>
+                    <input type="text" id="can_help" name="can_help"
+                           placeholder="Example: Python, Calculus" value="{{ values.can_help }}">
+                </label>
+
+                <label for="need_help">
+                    <span>Subjects you want help with</span>
+                    <input type="text" id="need_help" name="need_help"
+                           placeholder="Example: Algorithms, Statistics" value="{{ values.need_help }}">
+                </label>
+            </div>
+
+            <label for="interests">
+                <span>Clubs and interests <span class="optional">(optional)</span></span>
+                <input type="text" id="interests" name="interests"
+                       placeholder="Example: Society of Women Engineers, hackathons" value="{{ values.interests }}">
+                <small class="field-hint">Separate items with commas.</small>
+            </label>
+        </details>
+
+        <details class="form-section" open>
+            <summary><h2>Your study schedule</h2></summary>
+            <p class="section-note">Your weekly availability powers your study matches and group heatmaps.</p>
+            <div class="profile-links">
+                <a class="secondary" href="{{ url_for('availability') }}">Update availability</a>
+                <a class="secondary" href="{{ url_for('study_request') }}">Find my match</a>
+                <a class="secondary" href="{{ url_for('my_groups') }}">My groups</a>
+            </div>
+        </details>
+
+        <div class="form-actions">
+            <a class="secondary" href="/dashboard">Cancel</a>
+            <button type="submit" class="primary create-button">Save profile</button>
+        </div>
+
+    </form>
+
+    <section class="form-section danger-zone">
+        <h2>Danger zone</h2>
+        <div class="danger-row">
+            <p class="section-note">Deleting your account removes your profile, group memberships, invitations and notifications. Groups you created pass to their longest-standing member. This cannot be undone.</p>
+            <a class="secondary danger-link" href="/account/delete">Delete my account</a>
+        </div>
+    </section>
+
+</main>
+
+<script>
+(function () {
+    var header = document.querySelector('.profile-header');
+    document.querySelectorAll('.avatar-picker input[name="avatar_color"]').forEach(function (radio) {
+        radio.addEventListener('change', function () {
+            if (header && radio.dataset.hex) { header.style.background = radio.dataset.hex; }
+        });
+    });
+    /* phones: only the first section starts open, so the page isn't one endless scroll */
+    if (window.innerWidth < 720) {
+        document.querySelectorAll('details.form-section').forEach(function (d, i) {
+            if (i > 0) { d.removeAttribute('open'); }
+        });
+    }
+})();
+</script>
+
+{% include "_ui_foot.html" %}
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Log In | StudyMore</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='zine.css') }}">
+    {% include "_ui_head.html" %}
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='theme_motion.css') }}">
+    <script src="{{ url_for('static', filename='theme_motion.js') }}" defer></script>
+</head>
+
+<body class="auth-page">
+
+<header class="topbar">
+    <span class="brand">StudyMore</span>
+</header>
+
+<main class="auth-main">
+
+    <div class="auth-card">
+
+        <div class="auth-heading">
+            <h1>Welcome Back</h1>
+            <p>Log in to continue to StudyMore.</p>
+        </div>
+
+        {% if error %}
+        <div class="message error" role="alert">{{ error }}</div>
+        {% endif %}
+
+        {% if info %}
+        <div class="message success" role="status">{{ info }}</div>
+        {% endif %}
+
+        <form method="POST" class="auth-form">
+
+            <label>
+                <span>Email <span class="required">*</span></span>
+                <input
+                    name="email"
+                    type="email"
+                    placeholder="Enter your email"
+                    value="{{ email or '' }}"
+                    {% if error %}autofocus{% endif %}
+                    required>
+            </label>
+
+            <label>
+                <span>Password <span class="required">*</span></span>
+                <input
+                    name="password"
+                    type="password"
+                    placeholder="Enter your password"
+                    required>
+            </label>
+
+            <p class="required-note">
+                <span class="required">*</span> Required fields
+            </p>
+
+            <button type="submit" class="primary auth-button">
+                Log In
+            </button>
+
+        </form>
+
+        <p class="auth-switch">
+            <a href="{{ url_for('reset.forgot_password') }}">Forgot your password?</a>
+        </p>
+
+        <p class="auth-switch">
+            Don't have an account?
+            <a href="{{ url_for('register') }}">Sign up</a>
+        </p>
+
+    </div>
+
+</main>
+
+{% include "_ui_foot.html" %}
+</body>
+</html>

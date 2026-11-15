@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Edit Group | StudyMore</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='zine.css') }}">
+    {% include "_ui_head.html" %}
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='theme_motion.css') }}">
+    <script src="{{ url_for('static', filename='theme_motion.js') }}" defer></script>
+</head>
+
+<body>
+
+{% include "_nav.html" %}
+<div class="crumbs"><a href="#" class="back-link" onclick="history.back();return false;">&larr; Back</a></div>
+
+
+<main class="create-main">
+
+    <div class="page-heading">
+        <h1>Edit {{ group["group_name"] }}</h1>
+        <p>{{ group["course_code"] }} stays the same. Change the details members need.</p>
+    </div>
+    {% if error %}
+    <div class="message error" role="alert">
+        {{ error }}
+    </div>
+{% endif %}
+
+    <form method="POST" class="create-form">
+
+        <div class="form-section">
+            <h2>Group Information</h2>
+
+            <label for="group_name">
+                <span>Group Name <span class="required">*</span></span>
+                <input
+                    type="text"
+                    id="group_name"
+                    name="group_name"
+                    placeholder="Example: CSE 3311 Exam Study Group"
+                    value="{{ form['group_name'] or '' }}"
+                    required>
+            </label>
+
+            <label for="description">
+                <span>Description <span class="required">*</span></span>
+                <textarea
+                    id="description"
+                    name="description"
+                    rows="4"
+                    placeholder="Describe what your group plans to study."
+                    required>{{ form['description'] or '' }}</textarea>
+            </label>
+
+            <label for="is_private" class="privacy-toggle">
+                <span>
+                    <input type="checkbox" id="is_private" name="is_private" value="1"
+                           {% if form['is_private'] %}checked{% endif %}>
+                    <strong>Private group (invite only)</strong>
+                </span>
+                <small>Hidden from search, matches and suggestions. People can only join if you invite them.</small>
+            </label>
+
+        </div>
+
+
+        <div class="form-section">
+            <h2>Meeting Details</h2>
+
+            <fieldset class="meeting-options">
+                <legend>
+                    Meeting Type <span class="required">*</span>
+                </legend>
+
+                <label class="radio-option">
+                    <input
+                        type="radio"
+                        id="in_person"
+                        name="meeting_type"
+                        value="In-Person"
+                        {% if form['meeting_type'] == 'In-Person' %}checked{% endif %}
+                        required>
+                    <span>In-Person</span>
+                </label>
+
+                <label class="radio-option">
+                    <input
+                        type="radio"
+                        id="online"
+                        name="meeting_type"
+                        value="Online"
+                        {% if form['meeting_type'] == 'Online' %}checked{% endif %}>
+                    <span>Online</span>
+                </label>
+
+                <label class="radio-option">
+                    <input
+                        type="radio"
+                        id="hybrid"
+                        name="meeting_type"
+                        value="Hybrid"
+                        {% if form['meeting_type'] == 'Hybrid' %}checked{% endif %}>
+                    <span>Hybrid</span>
+                </label>
+            </fieldset>
+
+            <div class="form-grid">
+                <label for="meeting_date">
+                    <span>Meeting Date <span class="required">*</span></span>
+                    <input
+                        type="date"
+                        id="meeting_date"
+                        name="meeting_date"
+                        value="{{ form['meeting_date'] or '' }}"
+                        required>
+                </label>
+
+                <label for="meeting_time">
+                    <span>Meeting Time <span class="required">*</span></span>
+                    <input
+                        type="time"
+                        id="meeting_time"
+                        name="meeting_time"
+                        value="{{ form['meeting_time'] or '' }}"
+                        required>
+                </label>
+            </div>
+
+            <div class="form-grid">
+                <label for="location">
+                    <span>
+                        Location
+                        <span class="conditional">Required for In-Person & Hybrid</span>
+                    </span>
+                    <input
+                        type="text"
+                        id="location"
+                        name="location"
+                        placeholder="Example: UTA Central Library"
+                        value="{{ form['location'] or '' }}">
+                </label>
+
+                <label for="meeting_link">
+                    <span>
+                        Meeting Link
+                        <span class="conditional">Required for Online & Hybrid</span>
+                    </span>
+                    <input
+                        type="url"
+                        id="meeting_link"
+                        name="meeting_link"
+                        placeholder="Example: Teams or Zoom link"
+                        value="{{ form['meeting_link'] or '' }}">
+                </label>
+            </div>
+
+            <label for="max_members">
+                <span>Maximum Members <span class="required">*</span></span>
+                <input
+                    type="number"
+                    id="max_members"
+                    name="max_members"
+                    min="{{ [2, member_count]|max }}"
+                    placeholder="Minimum {{ [2, member_count]|max }}"
+                    value="{{ form['max_members'] or '' }}"
+                    required>
+            </label>
+
+        </div>
+
+        <p class="required-note">
+            <span class="required">*</span> Required fields
+        </p>
+
+        <button type="submit" class="primary create-button">
+            Save Changes
+        </button>
+        <a href="{{ url_for('group_details', group_id=group['id']) }}" class="secondary">Cancel</a>
+
+    </form>
+
+</main>
+
+{% include "_ui_foot.html" %}
+</body>
+</html>
